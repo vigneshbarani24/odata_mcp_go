@@ -156,6 +156,10 @@ func (s *Server) HandleMessage(ctx context.Context, msg *transport.Message) (*tr
 		return s.handleToolsListV2(req)
 	case "tools/call":
 		return s.handleToolsCallV2(req)
+	case "resources/list":
+		return s.handleResourcesListV2(req)
+	case "prompts/list":
+		return s.handlePromptsListV2(req)
 	case "ping":
 		return s.handlePingV2(req)
 	default:
@@ -204,6 +208,12 @@ func (s *Server) handleInitializeV2(req *Request) (*transport.Message, error) {
 		"capabilities": map[string]interface{}{
 			"tools": map[string]interface{}{
 				"listChanged": true,
+			},
+			"resources": map[string]interface{}{
+				"subscribe": false,
+			},
+			"prompts": map[string]interface{}{
+				"listChanged": false,
 			},
 		},
 		"serverInfo": map[string]interface{}{
@@ -284,6 +294,24 @@ func (s *Server) handleToolsCallV2(req *Request) (*transport.Message, error) {
 // handlePingV2 handles the ping request for transport
 func (s *Server) handlePingV2(req *Request) (*transport.Message, error) {
 	result := map[string]interface{}{}
+	return s.createResponse(req.ID, result)
+}
+
+// handleResourcesListV2 handles the resources/list request for transport
+func (s *Server) handleResourcesListV2(req *Request) (*transport.Message, error) {
+	// OData MCP bridge doesn't provide resources, only tools
+	result := map[string]interface{}{
+		"resources": []interface{}{},
+	}
+	return s.createResponse(req.ID, result)
+}
+
+// handlePromptsListV2 handles the prompts/list request for transport
+func (s *Server) handlePromptsListV2(req *Request) (*transport.Message, error) {
+	// OData MCP bridge doesn't provide prompts, only tools
+	result := map[string]interface{}{
+		"prompts": []interface{}{},
+	}
 	return s.createResponse(req.ID, result)
 }
 

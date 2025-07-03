@@ -16,6 +16,7 @@ import (
 
 	"github.com/zmcp/odata-mcp/internal/bridge"
 	"github.com/zmcp/odata-mcp/internal/config"
+	"github.com/zmcp/odata-mcp/internal/debug"
 	"github.com/zmcp/odata-mcp/internal/transport"
 	"github.com/zmcp/odata-mcp/internal/transport/http"
 	"github.com/zmcp/odata-mcp/internal/transport/stdio"
@@ -93,6 +94,9 @@ func init() {
 	// Transport options
 	rootCmd.Flags().String("transport", "stdio", "Transport type: 'stdio' or 'http' (SSE)")
 	rootCmd.Flags().String("http-addr", ":8080", "HTTP server address (used with --transport http)")
+	
+	// Debug options
+	rootCmd.Flags().Bool("trace-mcp", false, "Enable trace logging to debug MCP communication")
 
 	// Bind flags to viper for environment variable support
 	viper.BindPFlag("service", rootCmd.Flags().Lookup("service"))
@@ -207,6 +211,19 @@ func runBridge(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to get MCP server from bridge")
 	}
 	
+	// Set up tracing if requested
+	enableTrace, _ := cmd.Flags().GetBool("trace-mcp")
+	var tracer *debug.TraceLogger
+	if enableTrace {
+		tracer, err = debug.NewTraceLogger(true)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[ERROR] Failed to create trace logger: %v\n", err)
+		} else {
+			defer tracer.Close()
+			fmt.Fprintf(os.Stderr, "[TRACE] Trace logging enabled. Output file: %s\n", tracer.GetFilename())
+		}
+	}
+	
 	// Create handler function that delegates to the MCP server
 	handler := func(ctx context.Context, msg *transport.Message) (*transport.Message, error) {
 		return mcpServer.HandleMessage(ctx, msg)
@@ -226,7 +243,11 @@ func runBridge(cmd *cobra.Command, args []string) error {
 		if cfg.Verbose {
 			fmt.Fprintf(os.Stderr, "[VERBOSE] Using stdio transport\n")
 		}
-		trans = stdio.New(handler)
+		stdioTrans := stdio.New(handler)
+		if tracer != nil {
+			stdioTrans.SetTracer(tracer)
+		}
+		trans = stdioTrans
 	}
 	
 	// Set transport on the MCP server

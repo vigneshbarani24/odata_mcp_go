@@ -45,12 +45,13 @@ func NewODataMCPBridge(cfg *config.Config) (*ODataMCPBridge, error) {
 	// Create MCP server
 	mcpServer := mcp.NewServer(constants.MCPServerName, constants.MCPServerVersion)
 
+
 	bridge := &ODataMCPBridge{
-		config:   cfg,
-		client:   odataClient,
-		server:   mcpServer,
-		tools:    make(map[string]*models.ToolInfo),
-		stopChan: make(chan struct{}),
+		config:    cfg,
+		client:    odataClient,
+		server:    mcpServer,
+		tools:     make(map[string]*models.ToolInfo),
+		stopChan:  make(chan struct{}),
 	}
 
 	// Initialize metadata and tools
@@ -866,6 +867,11 @@ func (b *ODataMCPBridge) handleServiceInfo(ctx context.Context, args map[string]
 		"parsed_at": b.metadata.ParsedAt.Format("2006-01-02T15:04:05Z"),
 	}
 
+	// Add service-specific hints directly based on URL pattern
+	if b.isKnownProblematicService() {
+		info["implementation_hints"] = b.getServiceHints()
+	}
+
 	if includeMetadata {
 		info["entity_sets_detail"] = b.metadata.EntitySets
 		info["entity_types_detail"] = b.metadata.EntityTypes
@@ -1379,4 +1385,46 @@ func (b *ODataMCPBridge) handleFunctionCall(ctx context.Context, functionName st
 	}
 	
 	return string(result), nil
+}
+
+// isKnownProblematicService checks if the current service is known to have implementation issues
+func (b *ODataMCPBridge) isKnownProblematicService() bool {
+	// Check for SAP PO Tracking service
+	return strings.Contains(b.config.ServiceURL, "SRA020_PO_TRACKING_SRV")
+}
+
+// getServiceHints returns implementation hints for known problematic services
+func (b *ODataMCPBridge) getServiceHints() interface{} {
+	if strings.Contains(b.config.ServiceURL, "SRA020_PO_TRACKING_SRV") {
+		return map[string]interface{}{
+			"service_type": "SAP Purchase Order Tracking",
+			"known_issues": []string{
+				"The PONumber field might require specific formatting",
+				"Service expects numerical PO values despite string type definition",
+				"Leading zeros might be automatically removed by the service",
+			},
+			"recommended_usage": map[string]interface{}{
+				"filtering_examples": []string{
+					"$filter=PONumber eq '1234567890'",
+					"$filter=PONumber eq '0001234567'",
+				},
+				"notes": []string{
+					"Use quotes around PO numbers in filters",
+					"Try with and without leading zeros if queries fail",
+					"The service might have case-sensitive field names",
+				},
+			},
+			"field_hints": map[string]interface{}{
+				"PONumber": map[string]string{
+					"type":        "Edm.String",
+					"format":      "10-digit numeric string",
+					"example":     "1234567890",
+					"description": "Purchase Order number - expects numeric values as strings",
+				},
+			},
+		}
+	}
+	
+	// Default empty hints for other services
+	return map[string]interface{}{}
 }
