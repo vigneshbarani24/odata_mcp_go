@@ -44,6 +44,10 @@ type Config struct {
 	// Read-only mode flags
 	ReadOnly             bool `mapstructure:"read_only"`               // Read-only mode: hide all modifying operations
 	ReadOnlyButFunctions bool `mapstructure:"read_only_but_functions"` // Read-only mode but allow function imports
+	
+	// Hint configuration
+	HintsFile string `mapstructure:"hints_file"` // Path to hints JSON file
+	Hint      string `mapstructure:"hint"`       // Direct hint JSON from CLI
 }
 
 // HasBasicAuth returns true if username and password are configured

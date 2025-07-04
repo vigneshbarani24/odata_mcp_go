@@ -78,12 +78,31 @@ The server is functioning correctly, but MCP clients (especially Claude Desktop)
 
 ### 4. Service-Specific Issues
 
+**Using Service Hints:**
+
+The bridge includes a hint system that provides guidance for known service issues:
+
+```bash
+# Check for hints in service info
+./odata-mcp https://my-service.com/odata/
+# Then call odata_service_info tool to see implementation_hints
+
+# Use custom hints file
+./odata-mcp --hints-file my-hints.json https://my-service.com/odata/
+
+# Add quick hint from CLI
+./odata-mcp --hint "Check field casing in \$metadata" https://my-service.com/odata/
+```
+
 **SAP Services:**
 - Many SAP services require CSRF tokens
 - Use --legacy-dates flag for date compatibility
-- Some services have non-standard implementations (see hints in service info)
+- Some services return HTTP 501 for direct entity access - use $expand workaround (see hints)
+- Check implementation_hints in service info for specific guidance
 
 **Example for SAP PO Tracking Service:**
+- Returns HTTP 501 for direct entity access
+- **Workaround**: Use `filter_PurchaseOrderSet` with `$expand=PurchaseOrderItemDetails` instead of `get_PurchaseOrderItem`
 - PONumber field expects numeric strings despite type definition
 - Use quotes in filters: `$filter=PONumber eq '1234567890'`
 - Try with/without leading zeros if queries fail

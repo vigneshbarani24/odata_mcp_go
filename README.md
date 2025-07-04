@@ -18,7 +18,7 @@ This is a Go port of the Python OData-MCP bridge implementation, designed to be 
 - **Cross-Platform**: Native Go binary for easy deployment on any OS
 - **Read-Only Modes**: Restrict operations with `--read-only` or `--read-only-but-functions`
 - **MCP Protocol Debugging**: Built-in trace logging with `--trace-mcp` for troubleshooting
-- **Service-Specific Hints**: Automatic detection and hints for known problematic services
+- **Service-Specific Hints**: Flexible hint system with pattern matching for known service issues
 - **Full MCP Compliance**: Complete protocol implementation for all MCP clients
 - **Multiple Transports**: Support for stdio (default) and HTTP/SSE transports
 
@@ -392,6 +392,24 @@ export ODATA_PASSWORD=secret
 # Windows: %TEMP%\mcp_trace_*.log
 ```
 
+### Service Hints
+
+The OData MCP bridge includes a flexible hint system to provide guidance for services with known issues or special requirements:
+
+```bash
+# Use default hints.json from binary directory
+./odata-mcp https://my-service.com/odata/
+
+# Use custom hints file
+./odata-mcp --hints-file /path/to/custom-hints.json https://my-service.com/odata/
+
+# Inject hint directly from command line
+./odata-mcp --hint "Remember to use \$expand for complex queries" https://my-service.com/odata/
+
+# Combine file and CLI hints (CLI has higher priority)
+./odata-mcp --hints-file custom.json --hint '{"notes":["Override note"]}' https://my-service.com/odata/
+```
+
 ## Configuration
 
 ### Command Line Flags
@@ -416,6 +434,8 @@ export ODATA_PASSWORD=secret
 | `--trace-mcp` | Enable MCP protocol trace logging | `false` |
 | `--read-only, -ro` | Hide all modifying operations | `false` |
 | `--read-only-but-functions, -robf` | Hide create/update/delete but allow functions | `false` |
+| `--hints-file` | Path to hints JSON file | `hints.json` in binary dir |
+| `--hint` | Direct hint JSON or text from CLI | |
 | `--transport` | Transport type: 'stdio' or 'http' | `stdio` |
 | `--http-addr` | HTTP server address (with --transport http) | `:8080` |
 | `--legacy-dates` | Enable legacy date format conversion | `true` |
@@ -562,18 +582,94 @@ If you're experiencing issues with MCP clients (Claude Desktop, RooCode, GitHub 
 
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed troubleshooting guide.
 
-### Known Service Issues
+### Service Hints System
 
-Some OData services have implementation quirks. The bridge automatically detects and provides hints for:
+The OData MCP bridge includes a sophisticated hint system that helps users work around known service issues and provides implementation guidance.
 
-- **SAP PO Tracking Service** (`SRA020_PO_TRACKING_SRV`): Special handling for PONumber field formatting
-- More services will be added based on user reports
+#### Hint File Format
+
+Create a `hints.json` file with the following structure:
+
+```json
+{
+  "version": "1.0",
+  "hints": [
+    {
+      "pattern": "*/sap/opu/odata/*",
+      "priority": 10,
+      "service_type": "SAP OData Service",
+      "known_issues": ["List of known issues"],
+      "workarounds": ["List of workarounds"],
+      "field_hints": {
+        "FieldName": {
+          "type": "Edm.String",
+          "format": "Expected format",
+          "example": "12345",
+          "description": "Field description"
+        }
+      },
+      "examples": [
+        {
+          "description": "Example description",
+          "query": "filter_EntitySet with $filter=...",
+          "note": "Additional note"
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Pattern Matching
+
+The hint system supports wildcard patterns:
+- `*` matches any sequence of characters
+- `?` matches a single character
+- Multiple patterns can match the same service (hints are merged by priority)
+
+#### Default Hints
+
+The bridge includes default hints for common services:
+
+- **SAP OData Services** (`*/sap/opu/odata/*`): General SAP OData guidance including the critical workaround for HTTP 501 errors using `$expand`
+- **SAP PO Tracking** (`*SRA020_PO_TRACKING_SRV*`): Specific hints for purchase order tracking including field formatting
+- **Northwind Demo** (`*Northwind*`): Identifies the public demo service
+
+#### Using Hints
+
+Hints appear in the `odata_service_info` tool response under `implementation_hints`:
+
+```bash
+# View hints for your service
+./odata-mcp https://my-service.com/odata/
+# Then call the odata_service_info tool in your MCP client
+
+# The response includes:
+{
+  "implementation_hints": {
+    "service_type": "SAP OData Service",
+    "known_issues": [...],
+    "workarounds": [...],
+    "field_hints": {...},
+    "examples": [...],
+    "hint_source": "Hints file: hints.json"
+  }
+}
+```
 
 ## Security
 
 This project includes comprehensive security measures to prevent credential leaks. See [SECURITY.md](SECURITY.md) for details.
 
 **Important**: Never commit `.zmcp.json` or any files containing real credentials.
+
+## Documentation
+
+- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Quick command reference
+- [HINTS.md](HINTS.md) - Complete guide to the service hints system
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and solutions
+- [SECURITY.md](SECURITY.md) - Security considerations
+- [CHANGELOG.md](CHANGELOG.md) - Version history and changes
 
 ## Contributing
 

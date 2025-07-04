@@ -15,10 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Captures all incoming/outgoing MCP messages
   - Saves detailed trace logs to `/tmp/mcp_trace_*.log` (Linux/WSL) or `%TEMP%\mcp_trace_*.log` (Windows)
   - Helps diagnose client compatibility issues
-- **Service-specific hints** in `odata_service_info` tool
-  - Automatically detects known problematic services (e.g., SAP PO Tracking)
-  - Provides implementation hints and workarounds
-  - Includes field formatting guidance and example queries
+- **Flexible hint system** for service-specific guidance
+  - JSON-based hint configuration with wildcard pattern matching
+  - `--hints-file` flag to load custom hint files
+  - `--hint` flag for direct CLI hint injection
+  - Priority-based hint merging for multiple matching patterns
+  - Default hints for SAP OData services including HTTP 501 workarounds
+  - Hints appear in `odata_service_info` tool response
 - **Full MCP protocol compliance**
   - Added missing `resources/list` and `prompts/list` handlers
   - Proper capability declarations in initialize response

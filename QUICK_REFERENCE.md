@@ -57,6 +57,10 @@ export ODATA_PASSWORD=secret
 - `--trace` - Show tools and exit
 - `--trace-mcp` - Enable MCP protocol trace logging
 
+### Service Hints
+- `--hints-file` - Path to custom hints JSON file
+- `--hint` - Direct hint injection from CLI
+
 ### Response Options
 - `--max-items` - Max items per response (default: 100)
 - `--max-response-size` - Max response size (default: 5MB)
