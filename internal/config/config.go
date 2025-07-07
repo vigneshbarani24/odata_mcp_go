@@ -1,3 +1,6 @@
+// Copyright (c) 2024 OData MCP Contributors
+// SPDX-License-Identifier: MIT
+
 package config
 
 import (
