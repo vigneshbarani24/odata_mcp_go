@@ -30,6 +30,14 @@ type ODataClient struct {
 	isV4           bool           // Whether the service is OData v4
 }
 
+// encodeQueryParams encodes URL query parameters with proper space encoding
+// OData servers expect spaces to be encoded as %20, not + (RFC 3986)
+func encodeQueryParams(params url.Values) string {
+	encoded := params.Encode()
+	// Replace '+' with '%20' for OData compatibility
+	return strings.ReplaceAll(encoded, "+", "%20")
+}
+
 // NewODataClient creates a new OData client
 func NewODataClient(baseURL string, verbose bool) *ODataClient {
 	// Ensure base URL ends with /
@@ -344,7 +352,7 @@ func (c *ODataClient) GetEntitySet(ctx context.Context, entitySet string, option
 	}
 	
 	if len(params) > 0 {
-		endpoint += "?" + params.Encode()
+		endpoint += "?" + encodeQueryParams(params)
 	}
 
 	req, err := c.buildRequest(ctx, constants.GET, endpoint, nil)
@@ -376,7 +384,7 @@ func (c *ODataClient) GetEntity(ctx context.Context, entitySet string, key map[s
 			}
 		}
 		if len(params) > 0 {
-			endpoint += "?" + params.Encode()
+			endpoint += "?" + encodeQueryParams(params)
 		}
 	}
 
