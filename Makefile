@@ -41,7 +41,10 @@ help:
 	@echo "Available targets:"
 	@echo "  build         - Build binary for current platform"
 	@echo "  build-all     - Build binaries for all platforms"
-	@echo "  test          - Run tests"
+	@echo "  test          - Run Go unit tests"
+	@echo "  test-regression - Check if binary exists and works (catches ENOENT)"
+	@echo "  test-e2e      - Run end-to-end tests"
+	@echo "  test-all      - Run all tests including regression"
 	@echo "  clean         - Clean build artifacts"
 	@echo "  install       - Install binary to GOPATH/bin"
 	@echo "  run           - Build and run with sample service"
@@ -157,6 +160,27 @@ test:
 	@echo "Running tests..."
 	go test -v ./...
 	@echo "✅ Tests complete!"
+
+# Run regression test to ensure binary exists and works
+.PHONY: test-regression
+test-regression: 
+	@echo "Running regression tests (binary must exist)..."
+	@if [ ! -f "$(BINARY_NAME)" ]; then \
+		echo "❌ Binary not found! Run 'make build' first."; \
+		exit 1; \
+	fi
+	./test_regression_binary_exists.sh
+
+# Run E2E tests (requires binary)
+.PHONY: test-e2e
+test-e2e: test-regression
+	@echo "Running E2E tests..."
+	./test_streamable_http.sh
+
+# Run all tests including regression
+.PHONY: test-all
+test-all: test build test-regression test-e2e
+	@echo "✅ All tests passed including regression checks!"
 
 # Run with race detection
 .PHONY: test-race
