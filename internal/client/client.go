@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,13 +48,29 @@ func NewODataClient(baseURL string, verbose bool, insecureSkipTLSVerify bool) *O
 	}
 
 	// Create HTTP transport with TLS configuration
-	transport := &http.Transport{}
+	transport := &http.Transport{
+		// Add connection timeout settings to prevent hanging
+		DialContext: (&net.Dialer{
+			Timeout:   10 * time.Second, // Connection timeout
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		// Disable HTTP/2 for better SAP compatibility
+		ForceAttemptHTTP2: false,
+		// Limit idle connections
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 2,
+		IdleConnTimeout:     30 * time.Second,
+	}
 
 	// Apply insecure TLS config if flag is set
 	if insecureSkipTLSVerify {
-		transport.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
+		if transport.TLSClientConfig == nil {
+			transport.TLSClientConfig = &tls.Config{}
 		}
+		transport.TLSClientConfig.InsecureSkipVerify = true
 		if verbose {
 			fmt.Fprintln(os.Stderr, "⚠️  WARNING: TLS certificate verification is DISABLED")
 		}
