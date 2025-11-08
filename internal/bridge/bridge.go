@@ -38,7 +38,7 @@ type ODataMCPBridge struct {
 // NewODataMCPBridge creates a new bridge instance
 func NewODataMCPBridge(cfg *config.Config) (*ODataMCPBridge, error) {
 	// Create OData client
-	odataClient := client.NewODataClient(cfg.ServiceURL, cfg.Verbose)
+	odataClient := client.NewODataClient(cfg.ServiceURL, cfg.Verbose, cfg.InsecureSkipTLSVerify)
 
 	// Configure authentication
 	if cfg.HasBasicAuth() {

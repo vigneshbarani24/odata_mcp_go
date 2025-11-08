@@ -20,7 +20,7 @@ func TestFilterIntegration(t *testing.T) {
 		t.Skip("Skipping integration test: ODATA_URL, ODATA_USER, ODATA_PASS not set")
 	}
 
-	client := client.NewODataClient(odataURL, true)
+	client := client.NewODataClient(odataURL, true, false)
 	client.SetBasicAuth(odataUser, odataPass)
 
 	tests := []struct {

@@ -168,6 +168,7 @@ func (suite *CSRFTestSuite) SetupTest() {
 	suite.client = client.NewODataClient(
 		suite.mockServer.URL,
 		false,
+		false,
 	)
 	suite.client.SetBasicAuth("testuser", "testpass")
 }
@@ -314,7 +315,7 @@ func (suite *CSRFTestSuite) TestCSRFTokenRetryOn403() {
 	}))
 	defer testServer.Close()
 
-	client := client.NewODataClient(testServer.URL, false)
+	client := client.NewODataClient(testServer.URL, false, false)
 	client.SetBasicAuth("testuser", "testpass")
 
 	// Make a create request
@@ -386,7 +387,7 @@ func (suite *CSRFTestSuite) TestCSRFTokenHeaderVariations() {
 			defer server.Close()
 
 			// Create client with new server
-			client := client.NewODataClient(server.URL, false)
+			client := client.NewODataClient(server.URL, false, false)
 			client.SetBasicAuth("user", "pass")
 
 			// Make a create request
@@ -414,7 +415,7 @@ func TestCSRFIntegration(t *testing.T) {
 	t.Log("Running CSRF integration test against:", odataURL)
 
 	// Create real client
-	client := client.NewODataClient(odataURL, true)
+	client := client.NewODataClient(odataURL, true, false)
 	client.SetBasicAuth(odataUser, odataPass)
 
 	// Test 1: Get metadata to understand available entity sets

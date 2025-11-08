@@ -168,7 +168,7 @@ func TestODataV4ResponseHandling(t *testing.T) {
 	defer server.Close()
 
 	// Create client
-	odataClient := client.NewODataClient(server.URL, false)
+	odataClient := client.NewODataClient(server.URL, false, false)
 	ctx := context.Background()
 
 	// Fetch metadata to set v4 flag

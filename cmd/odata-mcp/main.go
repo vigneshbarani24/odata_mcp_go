@@ -118,6 +118,9 @@ func init() {
 	// Claude Code compatibility
 	rootCmd.Flags().BoolVarP(&cfg.ClaudeCodeFriendly, "claude-code-friendly", "c", false, "Remove $ prefix from OData parameters for Claude Code CLI compatibility")
 
+	// TLS configuration
+	rootCmd.Flags().BoolVar(&cfg.InsecureSkipTLSVerify, "insecure-skip-tls-verify", false, "⚠️  INSECURE: Skip TLS certificate verification (dev/test only - use with self-signed certificates)")
+
 	// Bind flags to viper for environment variable support
 	viper.BindPFlag("service", rootCmd.Flags().Lookup("service"))
 	viper.BindPFlag("username", rootCmd.Flags().Lookup("user"))

@@ -150,7 +150,7 @@ func TestQueryParameterTranslation(t *testing.T) {
 			defer server.Close()
 
 			// Create client
-			odataClient := client.NewODataClient(server.URL, false)
+			odataClient := client.NewODataClient(server.URL, false, false)
 			ctx := context.Background()
 
 			// Fetch metadata to set version
@@ -243,7 +243,7 @@ func TestCountToolTranslation(t *testing.T) {
 			defer server.Close()
 
 			// Create client
-			odataClient := client.NewODataClient(server.URL, false)
+			odataClient := client.NewODataClient(server.URL, false, false)
 			ctx := context.Background()
 
 			// Fetch metadata

@@ -70,7 +70,7 @@ func TestEntityKeyPredicate(t *testing.T) {
 			}))
 			defer server.Close()
 
-			client := client.NewODataClient(server.URL, false)
+			client := client.NewODataClient(server.URL, false, false)
 			client.SetBasicAuth("test", "test")
 
 			// Get entity
@@ -121,7 +121,7 @@ func TestProgramEntityRetrieval(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client := client.NewODataClient(server.URL, false)
+		client := client.NewODataClient(server.URL, false, false)
 		client.SetBasicAuth("test", "test")
 
 		// Get entity
@@ -148,7 +148,7 @@ func TestProgramEntityRetrieval(t *testing.T) {
 			t.Skip("Skipping integration test: ODATA_URL, ODATA_USER, ODATA_PASS not set")
 		}
 
-		client := client.NewODataClient(odataURL, true)
+		client := client.NewODataClient(odataURL, true, false)
 		client.SetBasicAuth(odataUser, odataPass)
 
 		// Try to get a known program (the one we created in previous tests)
@@ -215,7 +215,7 @@ func TestEntityFilter(t *testing.T) {
 				}))
 				defer server.Close()
 
-				client := client.NewODataClient(server.URL, false)
+				client := client.NewODataClient(server.URL, false, false)
 				client.SetBasicAuth("test", "test")
 
 				// Query with filter

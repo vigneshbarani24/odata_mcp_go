@@ -76,7 +76,7 @@ These are SAP service-level restrictions, not client bugs:
 
 ### Create Program (Working)
 ```go
-client := client.NewODataClient(serviceURL, true)
+client := client.NewODataClient(serviceURL, true, false)
 client.SetBasicAuth(username, password)
 
 program := map[string]interface{}{
