@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,16 +40,30 @@ func encodeQueryParams(params url.Values) string {
 }
 
 // NewODataClient creates a new OData client
-func NewODataClient(baseURL string, verbose bool) *ODataClient {
+func NewODataClient(baseURL string, verbose bool, insecureSkipTLSVerify bool) *ODataClient {
 	// Ensure base URL ends with /
 	if !strings.HasSuffix(baseURL, "/") {
 		baseURL += "/"
 	}
 
+	// Create HTTP transport with TLS configuration
+	transport := &http.Transport{}
+
+	// Apply insecure TLS config if flag is set
+	if insecureSkipTLSVerify {
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		if verbose {
+			fmt.Fprintln(os.Stderr, "⚠️  WARNING: TLS certificate verification is DISABLED")
+		}
+	}
+
 	return &ODataClient{
 		baseURL: baseURL,
 		httpClient: &http.Client{
-			Timeout: time.Duration(constants.DefaultTimeout) * time.Second,
+			Timeout:   time.Duration(constants.DefaultTimeout) * time.Second,
+			Transport: transport,
 		},
 		verbose: verbose,
 		isV4:    false, // Will be determined when fetching metadata

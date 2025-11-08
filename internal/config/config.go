@@ -63,6 +63,9 @@ type Config struct {
 
 	// Claude Code compatibility
 	ClaudeCodeFriendly bool `mapstructure:"claude_code_friendly"` // Remove $ prefix from OData parameters
+
+	// TLS configuration
+	InsecureSkipTLSVerify bool `mapstructure:"insecure_skip_tls_verify"` // Skip TLS certificate verification (INSECURE - dev/test only)
 }
 
 // HasBasicAuth returns true if username and password are configured

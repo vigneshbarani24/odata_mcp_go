@@ -29,7 +29,7 @@ func TestNorthwindV4Integration(t *testing.T) {
 
 	t.Run("DirectClient", func(t *testing.T) {
 		// Create client
-		odataClient := client.NewODataClient(serviceURL, true)
+		odataClient := client.NewODataClient(serviceURL, true, false)
 		ctx := context.Background()
 
 		// Test metadata fetch

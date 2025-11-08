@@ -118,7 +118,7 @@ func TestPROGRAMSetCreation(t *testing.T) {
 		defer server.Close()
 
 		// Create client
-		client := client.NewODataClient(server.URL, true)
+		client := client.NewODataClient(server.URL, true, false)
 		client.SetBasicAuth("testuser", "testpass")
 
 		// Test direct client creation
@@ -148,7 +148,7 @@ func TestPROGRAMSetCreation(t *testing.T) {
 		}
 
 		// Create real client
-		client := client.NewODataClient(odataURL, true)
+		client := client.NewODataClient(odataURL, true, false)
 		client.SetBasicAuth(odataUser, odataPass)
 
 		// Try to create a program
@@ -257,7 +257,7 @@ func TestCSRFTokenRetryScenario(t *testing.T) {
 	defer server.Close()
 
 	// Create client with verbose logging
-	client := client.NewODataClient(server.URL, true)
+	client := client.NewODataClient(server.URL, true, false)
 	client.SetBasicAuth("testuser", "testpass")
 
 	// Attempt to create program - should handle CSRF retry automatically

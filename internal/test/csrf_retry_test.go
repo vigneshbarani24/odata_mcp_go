@@ -72,7 +72,7 @@ func TestCSRFTokenRetryMechanism(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := client.NewODataClient(server.URL, false)
+	client := client.NewODataClient(server.URL, false, false)
 	client.SetBasicAuth("user", "pass")
 
 	// Make a create request
@@ -122,7 +122,7 @@ func TestCSRFProactiveFetch(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := client.NewODataClient(server.URL, false)
+	client := client.NewODataClient(server.URL, false, false)
 	client.SetBasicAuth("user", "pass")
 
 	// CreateEntity should fetch token before making the request
@@ -180,7 +180,7 @@ func TestCSRFTokenExpiry(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := client.NewODataClient(server.URL, false)
+	client := client.NewODataClient(server.URL, false, false)
 	client.SetBasicAuth("user", "pass")
 
 	// First request - should fetch token and succeed

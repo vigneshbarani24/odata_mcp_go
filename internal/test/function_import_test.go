@@ -76,7 +76,7 @@ func TestFunctionImportURIEncoding(t *testing.T) {
 			}))
 			defer server.Close()
 
-			client := client.NewODataClient(server.URL, false)
+			client := client.NewODataClient(server.URL, false, false)
 			client.SetBasicAuth("test", "test")
 
 			// Call the function
@@ -135,7 +135,7 @@ func TestActivateProgramFunction(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := client.NewODataClient(server.URL, false)
+	client := client.NewODataClient(server.URL, false, false)
 	client.SetBasicAuth("test", "test")
 
 	// Call ACTIVATE_PROGRAM
